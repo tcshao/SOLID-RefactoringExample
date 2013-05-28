@@ -8,16 +8,16 @@ namespace Initial
     {
         public class PriceService
         {
-            public string EndPoint { get; set; }
+            public string Uri { get; set; }
 
-            public PriceService(string endpoint)
+            public PriceService(string uri)
             {
-                EndPoint = endpoint;
+                Uri = uri;
             }
 
             public int GetPriceForDate(DateTime date)
             {
-                var response = new HttpClient().GetAsync(EndPoint + date.ToShortDateString()).Result;
+                var response = new HttpClient().GetAsync(Uri + date.ToShortDateString()).Result;
 
                 return int.Parse(response.Content.ReadAsStringAsync().Result);
             }
