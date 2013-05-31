@@ -1,17 +1,24 @@
 ﻿using System;
 using System.Net.Mail;
 using System.Net.Http;
+using System.IO;
 
-namespace SRP
+namespace OCP
 {
     class Program
     {
-        // This class has the Single Responsibility of Requesting the Price
-        public class PriceService
+        // This interface defines the behavior of the classes, which ensures they will still behave the same
+        // even though they are modified.
+        public interface IPriceService
+        {
+            int GetPriceForDate(DateTime date);
+        }
+
+        public class PriceServiceWeb : IPriceService
         {
             public string Uri { get; set; }
 
-            public PriceService(string uri)
+            public PriceServiceWeb(string uri)
             {
                 Uri = uri;
             }
@@ -24,7 +31,41 @@ namespace SRP
             }
         }
 
-        // This class has the single responsibility of sending an email
+        public class PriceServiceFile : IPriceService
+        {
+            public string FileName { get; set; }
+
+            public PriceServiceFile(string fileName)
+            {
+                FileName = fileName;
+            }
+
+            public int GetPriceForDate(DateTime date)
+            {
+                // reads from a CSV and gets data
+                int price = 0;
+
+                using (var sr = new StreamReader(FileName))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        var lineDate = line.Split(',')[0];
+                        var linePrice = line.Split(',')[1];
+
+                        if (lineDate == date.ToShortDateString())
+                        {
+                            price = int.Parse(linePrice);
+                            break;
+                        }
+                    }
+                }
+
+                return price;
+            }
+        }
+
+
         public class EmailService
         {
             public string SmtpServer { get; set; }
@@ -47,7 +88,7 @@ namespace SRP
 
         static void Main(string[] args)
         {
-            var priceService = new PriceService("http://www.null.com");
+            IPriceService priceService = new PriceServiceWeb("http://www.null.com");
             var emailService = new EmailService("smtp.null.com");
 
             var beginDate = DateTime.Now.Subtract(new TimeSpan(7, 0, 0, 0));
