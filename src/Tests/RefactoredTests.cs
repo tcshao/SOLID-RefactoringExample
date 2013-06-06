@@ -45,7 +45,6 @@ namespace Tests
         public void forecasted_price_should_be_the_average()
         {
             var expected = 25;
-
             var actual = Program.GetForecastedPrice(125, 5);
 
             Assert.Equal(expected, actual);
